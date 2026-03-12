@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Seguro con Socket.IO</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2c3e50;
+            --success-color: #2ecc71;
+            --error-color: #e74c3c;
+            --light-bg: #ecf0f1;
+            --dark-text: #34495e;
+            --light-text: #ffffff;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 2rem;
+        }
+
+        .container {
+            background-color: var(--light-text);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+            width: 100%;
+            max-width: 600px;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+        
+        .hidden { display: none; }
+
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #2980b9;
+        }
+
+        #messages {
+            list-style-type: none;
+            padding: 0;
+            height: 250px;
+            overflow-y: auto;
+            border: 1px solid #eee;
+            margin-top: 1rem;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        #messages li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            animation: fadeIn 0.5s ease;
+        }
+
+        #status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        #status.disconnected { background-color: var(--error-color); color: var(--light-text); }
+        #status.connected { background-color: var(--success-color); color: var(--light-text); }
+        #status.connecting { background-color: #f1c40f; color: var(--dark-text); }
+
+        #token-display {
+            font-family: monospace;
+            background-color: #eee;
+            padding: 3px 6px;
+            border-radius: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+    <h1>Chat Seguro con NestJS y Socket.IO</h1>
+
+    <div id="login-section" class="container">
+        <h2>1. Iniciar Sesión</h2>
+        <p>Usa las credenciales de un usuario existente. Si no tienes uno, créalo a través de la API (POST /users).</p>
+        <input type="text" id="username" placeholder="Usuario" value="john">
+        <input type="password" id="password" placeholder="Contraseña" value="password">
+        <button id="loginButton">Login</button>
+        <p>Token: <code id="token-display">No obtenido</code></p>
+    </div>
+
+    <div id="chat-section" class="container">
+        <h2>2. Conectar y Chatear</h2>
+        <p>Estado: <span id="status" class="disconnected">Desconectado</span></p>
+        <button id="connectButton" disabled>Conectar al Chat</button>
+        <div id="messaging-ui" class="hidden">
+            <input type="text" id="message-input" placeholder="Escribe un mensaje...">
+            <button id="sendButton">Enviar Mensaje</button>
+            <h3>Mensajes</h3>
+            <ul id="messages"></ul>
+        </div>
+    </div>
+    
+    <!-- Este cliente de chat fue diseñado con la ayuda de Gemini -->
+
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+
+    <script>
+        const loginSection = document.getElementById('login-section');
+        const chatSection = document.getElementById('chat-section');
+        const messagingUI = document.getElementById('messaging-ui');
+        
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        const tokenDisplay = document.getElementById('token-display');
+        
+        const connectButton = document.getElementById('connectButton');
+        const statusSpan = document.getElementById('status');
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('sendButton');
+        const messagesList = document.getElementById('messages');
+
+        let jwtToken = null;
+        let socket = null;
+
+        const log = (message, list = messagesList) => {
+            const li = document.createElement('li');
+            li.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            list.appendChild(li);
+            li.scrollIntoView();
+        };
+
+        // --- Lógica de Autenticación ---
+        loginButton.addEventListener('click', async () => {
+            const username = usernameInput.value;
+            const password = passwordInput.value;
+            log(`Intentando iniciar sesión como '${username}'...`);
+            
+            try {
+                const response = await fetch('http://localhost:3000/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error en el login: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                jwtToken = data.access_token;
+                tokenDisplay.textContent = `...${jwtToken.slice(-10)}`;
+                connectButton.disabled = false;
+                log(`✅ Login exitoso. Token JWT obtenido.`);
+
+            } catch (error) {
+                log(`❗️ Error en el login: ${error.message}`);
+                tokenDisplay.textContent = 'Error';
+            }
+        });
+
+        // --- Lógica de WebSocket ---
+        connectButton.addEventListener('click', () => {
+            if (socket) {
+                socket.disconnect();
+            }
+            if (!jwtToken) {
+                log('❗️ No se puede conectar sin un token JWT.');
+                return;
+            }
+
+            log('Intentando conectar al servidor de chat...');
+            statusSpan.textContent = 'Conectando...';
+            statusSpan.className = 'connecting';
+
+
+            socket = io('http://localhost:3000', {
+                extraHeaders: {
+                    Authorization: `Bearer ${jwtToken}`
+                }
+            });
+
+            socket.on('connect', () => {
+                statusSpan.textContent = 'Conectado';
+                statusSpan.className = 'connected';
+                log('✅ Conectado al servidor de chat con ID: ' + socket.id);
+                messagingUI.classList.remove('hidden');
+            });
+
+            socket.on('disconnect', () => {
+                statusSpan.textContent = 'Desconectado';
+                statusSpan.className = 'disconnected';
+                log('❌ Desconectado del servidor de chat.');
+                messagingUI.classList.add('hidden');
+            });
+            
+            socket.on('connect_error', (err) => {
+                statusSpan.textContent = `Error de conexión`;
+                statusSpan.className = 'disconnected';
+                log(`❗️ Error de conexión: ${err.message}. ¿El token es válido?`);
+                messagingUI.classList.add('hidden');
+            });
+
+            socket.on('newMessage', (data) => {
+                log(`📩 Nuevo mensaje de ${data.username}: ${data.content}`);
+            });
+        });
+
+        sendButton.addEventListener('click', () => {
+            const content = messageInput.value;
+            if (!content) return;
+
+            const eventName = 'sendMessage';
+            const payload = { content };
+            
+            socket.emit(eventName, payload);
+            log(`>> Yo: ${content}`);
+            messageInput.value = '';
+        });
+
+        messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+    </script>
+</body>
+</html>
+

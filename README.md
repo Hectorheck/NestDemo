@@ -5,7 +5,7 @@
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+  <p align="center">Un framework progresivo de <a href="http://nodejs.org" target="_blank">Node.js</a> para construir aplicaciones eficientes y escalables del lado del servidor.</p>
     <p align="center">
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
 <a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
@@ -21,78 +21,120 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## Descripción
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Repositorio de inicio de TypeScript para el framework [Nest](https://github.com/nestjs/nest).
 
-## Project setup
+## Configuración del proyecto con Docker
+
+### Prerrequisitos
+
+- [Docker](https://www.docker.com/get-started)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Instalación
+
+1.  Clona el repositorio:
+    ```bash
+    git clone https://github.com/tu-usuario/tu-repositorio.git
+    cd tu-repositorio
+    ```
+
+2.  Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales de AWS:
+    ```bash
+    # Credenciales de AWS
+    AWS_REGION=tu-region-de-aws
+    AWS_ACCESS_KEY_ID=tu-access-key-id-de-aws
+    AWS_SECRET_ACCESS_KEY=tu-secret-access-key-de-aws
+
+    # Configuración de SQS
+    SQS_QUEUE_URL=tu-url-de-cola-sqs
+    ```
+
+3.  Construye y ejecuta la aplicación con Docker Compose:
+    ```bash
+    docker-compose up --build
+    ```
+La base de datos se ejecuta en un contenedor separado. Los datos son temporales y se perderán si el contenedor se detiene.
+
+## Probando la aplicación
+
+Una vez que la aplicación esté en funcionamiento, puedes probarla usando el archivo `test-client.html` ubicado en la raíz del proyecto.
+
+1.  Abre el archivo `test-client.html` en tu navegador.
+2.  Inicia sesión con un usuario. Si no tienes uno, puedes crearlo a través de la API (POST /users).
+3.  Conéctate al chat y comienza a enviar mensajes.
+
+También puedes acceder a la documentación de Swagger en `http://localhost:3000/api`.
+
+## Configuración del proyecto local (sin Docker)
 
 ```bash
 $ npm install
 ```
 
-## Compile and run the project
+## Compilar y ejecutar el proyecto
 
 ```bash
-# development
+# desarrollo
 $ npm run start
 
-# watch mode
+# modo de observación
 $ npm run start:dev
 
-# production mode
+# modo de producción
 $ npm run start:prod
 ```
 
-## Run tests
+## Ejecutar pruebas
 
 ```bash
-# unit tests
+# pruebas unitarias
 $ npm run test
 
-# e2e tests
+# pruebas e2e
 $ npm run test:e2e
 
-# test coverage
+# cobertura de pruebas
 $ npm run test:cov
 ```
 
-## Deployment
+## Despliegue
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Cuando estés listo para desplegar tu aplicación NestJS a producción, hay algunos pasos clave que puedes seguir para asegurarte de que se ejecute de la manera más eficiente posible. Consulta la [documentación de despliegue](https://docs.nestjs.com/deployment) para obtener más información.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Si estás buscando una plataforma basada en la nube para desplegar tu aplicación NestJS, echa un vistazo a [Mau](https://mau.nestjs.com), nuestra plataforma oficial para desplegar aplicaciones NestJS en AWS. Mau hace que el despliegue sea sencillo y rápido, requiriendo solo unos pocos pasos simples:
 
 ```bash
 $ npm install -g @nestjs/mau
 $ mau deploy
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Con Mau, puedes desplegar tu aplicación en solo unos pocos clics, lo que te permite centrarte en la creación de características en lugar de en la gestión de la infraestructura.
 
-## Resources
+## Recursos
 
-Check out a few resources that may come in handy when working with NestJS:
+Echa un vistazo a algunos recursos que pueden ser útiles al trabajar con NestJS:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- Visita la [Documentación de NestJS](https://docs.nestjs.com) para aprender más sobre el framework.
+- Para preguntas y soporte, visita nuestro [canal de Discord](https://discord.gg/G7Qnnhy).
+- Para profundizar y obtener más experiencia práctica, echa un vistazo a nuestros [cursos de video](https://courses.nestjs.com/) oficiales.
+- Despliega tu aplicación en AWS con la ayuda de [NestJS Mau](https://mau.nestjs.com) en solo unos pocos clics.
+- Visualiza el gráfico de tu aplicación e interactúa con la aplicación NestJS en tiempo real usando [NestJS Devtools](https://devtools.nestjs.com).
+- ¿Necesitas ayuda con tu proyecto (a tiempo parcial o completo)? Echa un vistazo a nuestro [soporte empresarial](https://enterprise.nestjs.com) oficial.
+- Para mantenerte al día y recibir actualizaciones, síguenos en [X](https://x.com/nestframework) y [LinkedIn](https://linkedin.com/company/nestjs).
+- ¿Buscas trabajo o tienes una oferta de trabajo? Echa un vistazo a nuestra [bolsa de trabajo](https://jobs.nestjs.com) oficial.
 
-## Support
+## Soporte
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Nest es un proyecto de código abierto con licencia MIT. Puede crecer gracias a los patrocinadores y al apoyo de los increíbles patrocinadores. Si quieres unirte a ellos, por favor [lee más aquí](https://docs.nestjs.com/support).
 
-## Stay in touch
+## Mantente en contacto
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
+- Autor - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Sitio web - [https://nestjs.com](https://nestjs.com/)
 - Twitter - [@nestframework](https://twitter.com/nestframework)
 
-## License
+## Licencia
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Nest tiene [licencia MIT](https://github.com/nestjs/nest/blob/master/LICENSE).
