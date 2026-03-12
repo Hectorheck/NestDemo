@@ -35,8 +35,8 @@ Repositorio de inicio de TypeScript para el framework [Nest](https://github.com/
 
 1.  Clona el repositorio:
     ```bash
-    git clone https://github.com/tu-usuario/tu-repositorio.git
-    cd tu-repositorio
+    git clone https://github.com/tu-usuario/tu-repositorio.git](https://github.com/Hectorheck/NestDemo
+    cd NestDemo
     ```
 
 2.  Crea un archivo `.env` en la raíz del proyecto y agrega tus credenciales de AWS:
