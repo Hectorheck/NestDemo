@@ -30,7 +30,6 @@ Repositorio de inicio de TypeScript para el framework [Nest](https://github.com/
 ### Prerrequisitos
 
 - [Docker](https://www.docker.com/get-started)
-- [Docker Compose](https://docs.docker.com/compose/install/)
 
 ### Instalación
 
@@ -53,7 +52,7 @@ Repositorio de inicio de TypeScript para el framework [Nest](https://github.com/
 
 3.  Construye y ejecuta la aplicación con Docker Compose:
     ```bash
-    docker-compose up --build
+    docker compose up --build
     ```
 La base de datos se ejecuta en un contenedor separado. Los datos son temporales y se perderán si el contenedor se detiene.
 
